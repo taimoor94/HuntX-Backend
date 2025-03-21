@@ -4,6 +4,8 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  role: { type: String, enum: ["Employer", "Job Seeker"], required: true },
+  resume: { type: String }, // For Job Seekers
   createdAt: { type: Date, default: Date.now },
 });
 
