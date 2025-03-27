@@ -9,8 +9,8 @@ const applicationSchema = new mongoose.Schema({
   workExperience: { type: String, required: true },
   education: { type: String, required: true },
   skills: { type: String, required: true },
-  coverLetter: { type: String, required: true },
-  resume: { type: String, required: true },
+  coverLetter: { type: String }, // Base64 string
+  resume: { type: String }, // Base64 string
   question1: { type: String },
   status: { type: String, default: "Pending" },
   appliedAt: { type: Date, default: Date.now },
@@ -27,6 +27,8 @@ const jobSchema = new mongoose.Schema({
   postedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   createdAt: { type: Date, default: Date.now },
   applications: [applicationSchema],
+  requirements: { type: String },
+  benefits: { type: String },
 });
 
 export default mongoose.model("Job", jobSchema);

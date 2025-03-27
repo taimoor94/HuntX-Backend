@@ -13,7 +13,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", // Frontend URL (default Vite port)
+    origin: "http://localhost:5173",
     methods: ["GET", "POST"],
   },
 });
@@ -44,25 +44,20 @@ app.use("/api/connections", connectionRoutes);
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
-  // Join user to their own room based on userId
   socket.on("join", (userId) => {
     socket.join(userId);
     console.log(`User ${userId} joined their room`);
   });
 
-  // Handle sending messages
   socket.on("sendMessage", (message) => {
     const { conversationId, sender } = message;
-    // Emit the message to all participants in the conversation
     io.to(conversationId).emit("newMessage", message);
-    // Notify the recipient
     const recipientId = message.recipientId;
     io.to(recipientId).emit("newMessageNotification", {
       message: `New message from ${sender.name}`,
     });
   });
 
-  // Handle joining a conversation
   socket.on("joinConversation", (conversationId) => {
     socket.join(conversationId);
     console.log(`User joined conversation ${conversationId}`);

@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ["Job Seeker", "Employer"], required: true },
-  profilePicture: { type: String },
+  profilePicture: { type: String, default: "" }, // Add this field
   bio: { type: String },
   skills: { type: String },
   experience: { type: String },

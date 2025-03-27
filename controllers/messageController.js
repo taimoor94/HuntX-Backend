@@ -5,6 +5,10 @@ import User from "../models/User.js";
 
 export const startConversation = async (req, res) => {
   const { recipientId } = req.body;
+  if (!recipientId) {
+    return res.status(400).json({ message: "Recipient ID is required" });
+  }
+
   try {
     let conversation = await Conversation.findOne({
       participants: { $all: [req.user.id, recipientId] },
@@ -28,6 +32,10 @@ export const startConversation = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   const { conversationId, content } = req.body;
+  if (!conversationId || !content) {
+    return res.status(400).json({ message: "Conversation ID and content are required" });
+  }
+
   try {
     const message = new Message({
       conversationId,
@@ -47,6 +55,8 @@ export const sendMessage = async (req, res) => {
     const notification = new Notification({
       userId: recipientId,
       message: `You have a new message from ${sender.name}`,
+      type: "message",
+      relatedId: conversationId,
     });
     await notification.save();
 

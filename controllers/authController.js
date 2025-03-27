@@ -4,6 +4,10 @@ import User from "../models/User.js";
 
 export const signup = async (req, res) => {
   const { name, email, password, role } = req.body;
+  if (!name || !email || !password || !role) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: "User already exists" });
@@ -15,7 +19,7 @@ export const signup = async (req, res) => {
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-    res.status(201).json({ token, role: user.role, userId: user._id });
+    res.status(201).json({ token, role: user.role, userId: user._id, userName: user.name });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -23,6 +27,10 @@ export const signup = async (req, res) => {
 
 export const signin = async (req, res) => {
   const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
+
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
@@ -33,7 +41,7 @@ export const signin = async (req, res) => {
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-    res.status(200).json({ token, role: user.role, userId: user._id });
+    res.status(200).json({ token, role: user.role, userId: user._id, userName: user.name });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }

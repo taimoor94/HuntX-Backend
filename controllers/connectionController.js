@@ -4,6 +4,10 @@ import User from "../models/User.js";
 
 export const connect = async (req, res) => {
   const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
   try {
     const existingConnection = await Connection.findOne({
       $or: [
@@ -27,6 +31,8 @@ export const connect = async (req, res) => {
     const notification = new Notification({
       userId,
       message: `${user.name} sent you a connection request`,
+      type: "connection",
+      relatedId: connection._id,
     });
     await notification.save();
 
@@ -38,6 +44,10 @@ export const connect = async (req, res) => {
 
 export const acceptConnection = async (req, res) => {
   const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
   try {
     const connection = await Connection.findOne({
       userId: userId,
@@ -56,6 +66,8 @@ export const acceptConnection = async (req, res) => {
     const notification = new Notification({
       userId,
       message: `${user.name} accepted your connection request`,
+      type: "connection",
+      relatedId: connection._id,
     });
     await notification.save();
 
@@ -67,6 +79,10 @@ export const acceptConnection = async (req, res) => {
 
 export const removeConnection = async (req, res) => {
   const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
   try {
     await Connection.deleteOne({
       $or: [
@@ -92,12 +108,18 @@ export const getConnections = async (req, res) => {
         const otherUserId =
           conn.userId.toString() === req.user.id ? conn.connectedUserId : conn.userId;
         const user = await User.findById(otherUserId).select("name role profilePicture");
+        const status =
+          conn.status === "pending" && conn.userId.toString() === req.user.id
+            ? "pending"
+            : conn.status === "pending"
+            ? "incoming"
+            : "connected";
         return {
           _id: user._id,
           name: user.name,
           role: user.role,
           profilePicture: user.profilePicture,
-          status: conn.status,
+          status,
         };
       })
     );
